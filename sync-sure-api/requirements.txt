@@ -6,4 +6,5 @@ PyPDF2
 python-docx
 fastapi
 uvicorn[standard]
+gunicorn
 python-multipart

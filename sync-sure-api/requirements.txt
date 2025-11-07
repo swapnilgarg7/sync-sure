@@ -1,0 +1,9 @@
+langchain
+langchain-openai
+langchain-chroma
+pandas
+PyPDF2
+python-docx
+fastapi
+uvicorn[standard]
+python-multipart

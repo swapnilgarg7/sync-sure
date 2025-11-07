@@ -9,7 +9,7 @@ import tempfile
 import json
 import uvicorn
 from fastapi import FastAPI, UploadFile, File, HTTPException
-from document_parser import load_document_text
+
 
 load_dotenv()
 
@@ -89,6 +89,57 @@ Now begin the analysis using the provided CONTRACT DATA and INVOICE DATA.
 
 prompt = ChatPromptTemplate.from_template(template)
 chain = prompt | model
+
+# --- Text Extraction Logic ---
+
+def extract_pdf_text(pdf_path):
+    """Extracts all text from a PDF and returns a single string."""
+    print(f"[INFO] Extracting text from PDF: {pdf_path}")
+    full_text = ""
+    try:
+        reader = PdfReader(pdf_path)
+        for i, page in enumerate(reader.pages):
+            try:
+                text = page.extract_text() or ""
+            except Exception:
+                text = ""
+            full_text += text + "\n\n"
+    except FileNotFoundError:
+        print(f"[WARN] PDF not found: {pdf_path}")
+    except Exception as e:
+        print(f"[ERROR] Failed to read PDF {pdf_path}: {e}")
+    return full_text.strip()
+
+def extract_docx_text(docx_path):
+    """Extracts all text from a DOCX and returns a single string."""
+    print(f"[INFO] Extracting text from DOCX: {docx_path}")
+    full_text = ""
+    try:
+        document = docx.Document(docx_path)
+        for para in document.paragraphs:
+            full_text += para.text + "\n"
+    except FileNotFoundError:
+        print(f"[WARN] DOCX not found: {docx_path}")
+    except Exception as e:
+        print(f"[ERROR] Failed to read DOCX {docx_path}: {e}")
+    return full_text.strip()
+
+def load_document_text(file_path, original_filename):
+    """
+    Loads text from a file, automatically detecting if it's PDF or DOCX
+    based on the original filename's extension.
+    """
+    if not os.path.exists(file_path):
+        print(f"[ERROR] File not found at path: {file_path}")
+        return None
+        
+    if original_filename.lower().endswith('.pdf'):
+        return extract_pdf_text(file_path)
+    elif original_filename.lower().endswith('.docx'):
+        return extract_docx_text(file_path)
+    else:
+        print(f"[WARN] Unsupported file type: {original_filename}. Only .pdf and .docx are supported.")
+        return None
 
 def save_upload_file_temp(upload_file: UploadFile) -> str:
     """Saves UploadFile to a temporary file and returns the path."""

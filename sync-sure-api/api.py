@@ -150,7 +150,7 @@ def analyze_document_files(contract_path, contract_filename, invoice_path, invoi
         }
 
 
-MICROSOFT_APP_ID = os.getenv("MICROSOFT_APP_ID", "")
+MICROSOFT_APP_ID = os.getenv("MICROSOFT_APP_ID")
 
 # Bot adapter
 adapter_settings = BotFrameworkAdapterSettings(MICROSOFT_APP_ID)
